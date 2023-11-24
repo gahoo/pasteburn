@@ -18,6 +18,26 @@ function getPayloadKey(id: string) {
   return `${id}-payload`;
 }
 
+function b64toBlob(b64Data:string, contentType='', sliceSize=512) {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+}
+
 enum PasteState {
   Loading = "Loading",
   Server = "Paste alive",
@@ -102,9 +122,7 @@ export default function Message(props: MessageProps) {
     } else if (paste.type == "blob") {
       setTimeout(() => {
         download(
-          new Blob(Buffer.from(paste.data, "base64") as any, {
-            type: paste.mime,
-          }),
+          b64toBlob(paste.data, paste.mime),
           id as string,
           paste.mime
         );
