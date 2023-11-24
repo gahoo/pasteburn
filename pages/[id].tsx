@@ -121,11 +121,22 @@ export default function Message(props: MessageProps) {
       }, 0);
     } else if (paste.type == "blob") {
       setTimeout(() => {
-        download(
-          b64toBlob(paste.data, paste.mime),
-          id as string,
-          paste.mime
-        );
+        const url=URL.createObjectURL(b64toBlob(paste.data, paste.mime));
+        const img = document.querySelector('img.content') as HTMLImageElement;
+        if(img !== null){
+          img.src = url;
+        }
+        const source = document.querySelector('source.content') as HTMLSourceElement;
+        if(source !== null){
+          source.src = url;
+        }
+        const anchor=document.getElementById('blobLink') as HTMLAnchorElement;
+        if(anchor !== null){
+          anchor.href = url;
+        }
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 10000);
       }, 0);
     }
   }, [paste, id]);
@@ -141,7 +152,20 @@ export default function Message(props: MessageProps) {
               {paste.text}
             </div>
           )}
-          {paste.type == "blob" && paste.mime}
+          {paste.type == "blob" && 
+            <div>
+            {paste.mime.startsWith("video/") && (
+              <video controls>
+                <source className="content" type={paste.mime} />
+              </video> 
+            )}
+
+            {paste.mime.startsWith("image/") && (
+              <img className="content"/>
+            )}
+              <a id="blobLink" download>Download</a>
+            </div>
+          }
         </div>
       )}
       {pasteState != PasteState.Server && (
