@@ -155,6 +155,8 @@ const OPTIONS = [
   { label: "1 Hour", id: "60" },
   { label: "2 Hour", id: "90" },
   { label: "4 Hour", id: "240" },
+  { label: "8 Hour", id: "480" },
+  { label: "12 Hour", id: "720" },
   { label: "1 Day", id: "1440" },
 ];
 
@@ -239,6 +241,10 @@ function BurnControl({
               value={password}
               type="text"
               onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              onFocus={(e) => {
+                e.target.value = (Math.random() + 1).toString(36).substring(7);
                 setPassword(e.target.value);
               }}
               placeholder="Password"
