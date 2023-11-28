@@ -122,21 +122,15 @@ export default function Message(props: MessageProps) {
     } else if (paste.type == "blob") {
       setTimeout(() => {
         const url=URL.createObjectURL(b64toBlob(paste.data, paste.mime));
-        const img = document.querySelector('img.content') as HTMLImageElement;
-        if(img !== null){
-          img.src = url;
+        if(paste.mime.startsWith("image/") || paste.mime.startsWith("video/") || paste.mime == "application/pdf" || paste.mime == "text/html"){
+          window.location.href = url;
+        }else{
+          download(
+            b64toBlob(paste.data, paste.mime),
+            id as string,
+            paste.mime
+          );
         }
-        const source = document.querySelector('source.content') as HTMLSourceElement;
-        if(source !== null){
-          source.src = url;
-        }
-        const anchor=document.getElementById('blobLink') as HTMLAnchorElement;
-        if(anchor !== null){
-          anchor.href = url;
-        }
-        setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-        }, 10000);
       }, 0);
     }
   }, [paste, id]);
@@ -152,20 +146,7 @@ export default function Message(props: MessageProps) {
               {paste.text}
             </div>
           )}
-          {paste.type == "blob" && 
-            <div>
-            {paste.mime.startsWith("video/") && (
-              <video controls>
-                <source className="content" type={paste.mime} />
-              </video> 
-            )}
-
-            {paste.mime.startsWith("image/") && (
-              <img className="content"/>
-            )}
-              <a id="blobLink" download>Download</a>
-            </div>
-          }
+          {paste.type == "blob" && (paste.mime)}
         </div>
       )}
       {pasteState != PasteState.Server && (
